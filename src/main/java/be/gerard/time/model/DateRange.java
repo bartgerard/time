@@ -4,6 +4,7 @@ import org.apache.commons.lang3.Validate;
 import org.springframework.util.Assert;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,10 +41,21 @@ public record DateRange(
         return of(day, LocalDate.MAX);
     }
 
+    public long length() {
+        return ChronoUnit.DAYS.between(this.startDate(), this.endDate());
+    }
+
     public boolean contains(
             final LocalDate day
     ) {
         return !day.isBefore(startDate()) && day.isBefore(endDate());
+    }
+
+    public boolean overlaps(
+            final DateRange other
+    ) {
+        return other.startDate().isBefore(this.endDate())
+                && this.startDate().isBefore(other.endDate());
     }
 
     public static Set<DateRange> toIntersections(
@@ -146,4 +158,5 @@ public record DateRange(
     public String toString() {
         return "[" + this.startDate + "," + this.endDate + "[";
     }
+
 }

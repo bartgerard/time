@@ -12,6 +12,24 @@ import static be.gerard.time.DateRangeTestUtils.*
 @Title("DateRange Tests")
 class DateRangeSpecification extends Specification {
 
+    def "length"() {
+        //given:
+
+        when:
+        final long length = dateRange.length()
+
+        then:
+        Assertions.assertThat(length).isEqualTo(expectedLength)
+
+        where:
+        dateRange                           | expectedLength
+        range1(["2000-01-01",])             | 1
+        range1(["2000-01-01",])             | 1
+        range(["2000-01-01", "2000-01-03"]) | 2
+        range(["2000-01-01", "2000-01-04"]) | 3
+
+    }
+
     def "contains"() {
         //given:
 
@@ -27,6 +45,27 @@ class DateRangeSpecification extends Specification {
         range1(["2000-01-01",]) | day("2000-01-02") | false
         range(["2000-01-01",])  | day("2000-01-02") | true
         range(["2000-01-01",])  | day("1999-12-31") | false
+
+    }
+
+    def "overlaps"() {
+        //given:
+
+        when:
+        final boolean overlapping = dateRange1.overlaps(dateRange2)
+
+        then:
+        Assertions.assertThat(overlapping).isEqualTo(isOverlapping)
+
+        where:
+        dateRange1                          | dateRange2                          | isOverlapping
+        range(["2000-01-01",])              | range(["2000-01-01",])              | true
+        range(["2000-01-01",])              | range(["2000-01-02",])              | true
+        range1(["2000-01-01",])             | range1(["2000-01-02",])             | false
+        range(["2000-01-01", "2000-01-10"]) | range(["2000-01-03", "2000-01-04"]) | true
+        range(["2000-01-03", "2000-01-05"]) | range(["2000-01-01", "2000-01-10"]) | true
+        range(["2000-01-01", "2000-01-05"]) | range(["2000-01-03", "2000-01-10"]) | true
+        range(["2000-01-03", "2000-01-10"]) | range(["2000-01-01", "2000-01-05"]) | true
 
     }
 
@@ -100,13 +139,15 @@ class DateRangeSpecification extends Specification {
         Assertions.assertThat(groupSubsequentDays).containsExactlyInAnyOrderElementsOf(expectedDateRanges)
 
         where:
-        days                                                                                | expectedDateRanges
-        Collections.<LocalDate> emptyList()                                                 | Collections.<DateRange> emptySet()
-        List.of(day("2000-01-01"))                                                          | Set.of(range1(["2000-01-01",]))
-        List.of(day("2000-01-01"), day("2000-01-02"))                                       | Set.of(range(["2000-01-01", "2000-01-03"]))
-        List.of(day("2000-01-01"), day("2000-01-03"))                                       | Set.of(range1(["2000-01-01",]), range1(["2000-01-03",]))
-        List.of(day("2000-01-01"), day("2000-01-02"), day("2000-01-03"))                    | Set.of(range(["2000-01-01", "2000-01-04"]))
-        List.of(day("2000-01-01"), day("2000-01-02"), day("2000-01-04"), day("2000-01-05")) | Set.of(range(["2000-01-01", "2000-01-03"]), range(["2000-01-04", "2000-01-06"]))
+        days                                                                                                   | expectedDateRanges
+        Collections.<LocalDate> emptyList()                                                                    | Collections.<DateRange> emptySet()
+        List.of(day("2000-01-01"))                                                                             | Set.of(range1(["2000-01-01",]))
+        List.of(day("2000-01-01"), day("2000-01-02"))                                                          | Set.of(range(["2000-01-01", "2000-01-03"]))
+        List.of(day("2000-01-01"), day("2000-01-03"))                                                          | Set.of(range1(["2000-01-01",]), range1(["2000-01-03",]))
+        List.of(day("2000-01-01"), day("2000-01-03"), day("2000-01-05"))                                       | Set.of(range1(["2000-01-01",]), range1(["2000-01-03",]), range1(["2000-01-05",]))
+        List.of(day("2000-01-01"), day("2000-01-02"), day("2000-01-03"))                                       | Set.of(range(["2000-01-01", "2000-01-04"]))
+        List.of(day("2000-01-01"), day("2000-01-02"), day("2000-01-04"), day("2000-01-05"))                    | Set.of(range(["2000-01-01", "2000-01-03"]), range(["2000-01-04", "2000-01-06"]))
+        List.of(day("2000-01-01"), day("2000-01-02"), day("2000-01-04"), day("2000-01-06"), day("2000-01-07")) | Set.of(range(["2000-01-01", "2000-01-03"]), range1(["2000-01-04",]), range(["2000-01-06", "2000-01-08"]))
 
     }
 
@@ -131,6 +172,9 @@ class DateRangeSpecification extends Specification {
         List.of(range(["2000-01-01", "2000-01-03"]), range(["2000-01-03", "2000-01-07"])) | Set.of(range(["2000-01-01", "2000-01-07"]))                                      | ""
         List.of(range(["2000-01-01", "2000-01-03"]), range(["2000-01-04", "2000-01-07"])) | Set.of(range(["2000-01-01", "2000-01-03"]), range(["2000-01-04", "2000-01-07"])) | ""
         List.of(range(["2000-01-01", "2000-01-04"]), range(["2000-01-03", "2000-01-07"])) | Set.of(range(["2000-01-01", "2000-01-07"]))                                      | "overlap"
+        List.of(range(["2000-01-01", "2000-01-04"]), range1(["2000-01-01",]))             | Set.of(range(["2000-01-01", "2000-01-04"]))                                      | "overlap"
+        List.of(range(["2000-01-01", "2000-01-04"]), range1(["2000-01-03",]))             | Set.of(range(["2000-01-01", "2000-01-04"]))                                      | "overlap"
+        List.of(range(["2000-01-01", "2000-01-04"]), range1(["2000-01-04",]))             | Set.of(range(["2000-01-01", "2000-01-05"]))                                      | ""
 
     }
 
