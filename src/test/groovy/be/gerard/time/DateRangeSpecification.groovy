@@ -100,13 +100,39 @@ class DateRangeSpecification extends Specification {
         Assertions.assertThat(groupSubsequentDays).containsExactlyInAnyOrderElementsOf(expectedDateRanges)
 
         where:
-        days                                                             | expectedDateRanges
-        Collections.<LocalDate> emptyList()                              | Collections.<DateRange> emptySet()
-        List.of(day("2000-01-01"))                                       | Set.of(range1(["2000-01-01",]))
-        List.of(day("2000-01-01"), day("2000-01-02"))                    | Set.of(range(["2000-01-01", "2000-01-03"]))
-        List.of(day("2000-01-01"), day("2000-01-03"))                    | Set.of(range1(["2000-01-01",]), range1(["2000-01-03",]))
-        List.of(day("2000-01-01"), day("2000-01-02"), day("2000-01-03")) | Set.of(range(["2000-01-01", "2000-01-04"]))
+        days                                                                                | expectedDateRanges
+        Collections.<LocalDate> emptyList()                                                 | Collections.<DateRange> emptySet()
+        List.of(day("2000-01-01"))                                                          | Set.of(range1(["2000-01-01",]))
+        List.of(day("2000-01-01"), day("2000-01-02"))                                       | Set.of(range(["2000-01-01", "2000-01-03"]))
+        List.of(day("2000-01-01"), day("2000-01-03"))                                       | Set.of(range1(["2000-01-01",]), range1(["2000-01-03",]))
+        List.of(day("2000-01-01"), day("2000-01-02"), day("2000-01-03"))                    | Set.of(range(["2000-01-01", "2000-01-04"]))
+        List.of(day("2000-01-01"), day("2000-01-02"), day("2000-01-04"), day("2000-01-05")) | Set.of(range(["2000-01-01", "2000-01-03"]), range(["2000-01-04", "2000-01-06"]))
 
     }
+
+    def "merge"() {
+        //given:
+
+        when:
+        final Set<DateRange> mergedDateRanges = DateRange.merge(dateRanges)
+
+        then:
+        Assertions.assertThat(mergedDateRanges).containsExactlyInAnyOrderElementsOf(expectedDateRanges)
+
+        where:
+        dateRanges                                                                        | expectedDateRanges                                                               | comment
+        Collections.<DateRange> emptyList()                                               | Collections.<DateRange> emptySet()                                               | ""
+        List.of(range1(["2000-01-01",]))                                                  | Set.of(range1(["2000-01-01",]))                                                  | ""
+        List.of(range(["2000-01-01", "2000-01-03"]))                                      | Set.of(range(["2000-01-01", "2000-01-03"]))                                      | ""
+        List.of(range1(["2000-01-01",]), range1(["2000-01-02",]))                         | Set.of(range(["2000-01-01", "2000-01-03"]))                                      | ""
+        List.of(range1(["2000-01-01",]), range(["2000-01-02", "2000-01-03"]))             | Set.of(range(["2000-01-01", "2000-01-03"]))                                      | ""
+        List.of(range(["2000-01-01", "2000-01-02"]), range1(["2000-01-02",]))             | Set.of(range(["2000-01-01", "2000-01-03"]))                                      | ""
+        List.of(range(["2000-01-01", "2000-01-02"]), range(["2000-01-02", "2000-01-03"])) | Set.of(range(["2000-01-01", "2000-01-03"]))                                      | ""
+        List.of(range(["2000-01-01", "2000-01-03"]), range(["2000-01-03", "2000-01-07"])) | Set.of(range(["2000-01-01", "2000-01-07"]))                                      | ""
+        List.of(range(["2000-01-01", "2000-01-03"]), range(["2000-01-04", "2000-01-07"])) | Set.of(range(["2000-01-01", "2000-01-03"]), range(["2000-01-04", "2000-01-07"])) | ""
+        List.of(range(["2000-01-01", "2000-01-04"]), range(["2000-01-03", "2000-01-07"])) | Set.of(range(["2000-01-01", "2000-01-07"]))                                      | "overlap"
+
+    }
+
 
 }

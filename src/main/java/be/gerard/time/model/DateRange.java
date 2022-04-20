@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -73,6 +74,41 @@ public record DateRange(
                 .collect(Collectors.toUnmodifiableSet());
     }
 
+    public static Set<DateRange> merge(
+            final Collection<DateRange> dateRanges
+    ) {
+        final Set<DateRange> intersections = toIntersections(dateRanges);
+
+        final DateRange[] sortedIntersections = intersections.stream()
+                .distinct()
+                .sorted(Comparator.comparing(DateRange::startDate))
+                .toArray(DateRange[]::new);
+
+        if (sortedIntersections.length == 0) {
+            return Collections.emptySet();
+        } else if (sortedIntersections.length == 1) {
+            return Set.of(sortedIntersections[0]);
+        }
+
+        final int[] nonConsecutiveIndices = IntStream.range(1, sortedIntersections.length)
+                .filter(i -> !sortedIntersections[i - 1].endDate().isEqual(sortedIntersections[i].startDate()))
+                .toArray();
+
+        final int[] dateRangeBorders = IntStream.concat(
+                        IntStream.of(0, sortedIntersections.length),
+                        Arrays.stream(nonConsecutiveIndices)
+                )
+                .sorted()
+                .toArray();
+
+        return IntStream.range(1, dateRangeBorders.length)
+                .mapToObj(i -> DateRange.of(
+                        sortedIntersections[dateRangeBorders[i - 1]].startDate(),
+                        sortedIntersections[dateRangeBorders[i] - 1].endDate()
+                ))
+                .collect(Collectors.toUnmodifiableSet());
+    }
+
     public static Set<DateRange> groupSubsequentDays(
             final Collection<LocalDate> days
     ) {
@@ -80,7 +116,6 @@ public record DateRange(
                 .distinct()
                 .sorted()
                 .toArray(LocalDate[]::new);
-
 
         if (sortedDays.length == 0) {
             return Collections.emptySet();
