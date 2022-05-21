@@ -1,6 +1,6 @@
-package be.gerard.time
+package be.gerard.time.api
 
-import be.gerard.time.model.DateRange
+
 import org.apache.commons.lang3.Validate
 
 import java.time.LocalDate

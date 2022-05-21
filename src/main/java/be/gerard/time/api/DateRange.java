@@ -1,7 +1,4 @@
-package be.gerard.time.model;
-
-import org.apache.commons.lang3.Validate;
-import org.springframework.util.Assert;
+package be.gerard.time.api;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -14,16 +11,19 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static org.apache.commons.lang3.Validate.isTrue;
+import static org.apache.commons.lang3.Validate.notNull;
+
 public record DateRange(
         LocalDate startDate,
         LocalDate endDate
 ) {
 
     public DateRange {
-        Validate.notNull(startDate, "range.startDate is invalid [null]");
-        Validate.notNull(endDate, "range.endDate is invalid [null]");
+        notNull(startDate, "range.startDate is invalid [null]");
+        notNull(endDate, "range.endDate is invalid [null]");
 
-        Assert.isTrue(!startDate.isAfter(endDate), "range.endDate should be after range.startDate");
+        isTrue(!startDate.isAfter(endDate), "range.endDate should be after range.startDate");
     }
 
     public static DateRange of(

@@ -1,13 +1,12 @@
-package be.gerard.time
+package be.gerard.time.api
 
-import be.gerard.time.model.DateRange
 import org.assertj.core.api.Assertions
 import spock.lang.Specification
 import spock.lang.Title
 
 import java.time.LocalDate
 
-import static be.gerard.time.DateRangeTestUtils.*
+import static be.gerard.time.api.DateRangeTestUtils.*
 
 @Title("DateRange Tests")
 class DateRangeSpecification extends Specification {
@@ -126,7 +125,7 @@ class DateRangeSpecification extends Specification {
         // EXPECTED:
         // |----|----|
         List.of(range(["2000-01-01", "2000-01-04"]), range(["2000-01-04", "2000-01-07"])) | Set.of(range(["2000-01-01", "2000-01-04"]), range(["2000-01-04", "2000-01-07"]))                                      | ""
-        List.of(range(["2022-04-04", "2022-04-06"]), range(["2022-04-05", "2022-04-07"])) | Set.of(range1(["2022-04-04"]), range1(["2022-04-05",]), range1(["2022-04-06",]))                                      | ""
+        List.of(range(["2022-04-04", "2022-04-06"]), range(["2022-04-05", "2022-04-07"])) | Set.of(range1(["2022-04-04"]), range1(["2022-04-05",]), range1(["2022-04-06",]))                                      | "overlap"
 
     }
 

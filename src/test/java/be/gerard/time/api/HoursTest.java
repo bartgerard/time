@@ -1,4 +1,4 @@
-package be.gerard.time.model;
+package be.gerard.time.api;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
