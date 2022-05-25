@@ -33,7 +33,7 @@ jobs:
           settings-path: ${{ github.workspace }} # location for the settings.xml file
 
       - name: Set version to ${{ inputs.version }}
-        run: mvn --batch-mode -e clean versions:set -DnewVersion=${{ inputs.version }} versions:commit
+        run: mvn --batch-mode -e clean versions:set -DnewVersion=${{ github.events.inputs.version }} versions:commit
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml
