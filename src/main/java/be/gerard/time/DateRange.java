@@ -9,8 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -55,7 +54,7 @@ public interface DateRange {
         );
     }
 
-    static Set<DateRange> groupSubsequentDays(
+    static List<DateRange> groupSubsequentDays(
             final Collection<LocalDate> days
     ) {
         final List<LocalDate> sortedDays = days.stream()
@@ -64,9 +63,9 @@ public interface DateRange {
                 .toList();
 
         if (sortedDays.isEmpty()) {
-            return Collections.emptySet();
+            return Collections.emptyList();
         } else if (sortedDays.size() == 1) {
-            return Set.of(ofOneDay(sortedDays.get(0)));
+            return List.of(ofOneDay(sortedDays.get(0)));
         }
 
         final int[] nonConsecutiveIndices = IntStream.range(1, sortedDays.size())
@@ -85,7 +84,23 @@ public interface DateRange {
                         sortedDays.get(dateRangeBorders[i - 1]),
                         sortedDays.get(dateRangeBorders[i] - 1)
                 ))
-                .collect(Collectors.toUnmodifiableSet());
+                .toList();
+    }
+
+    private static LocalDate toExclusiveEndDate(
+            final LocalDate date
+    ) {
+        return LocalDate.MAX.isEqual(date)
+                ? LocalDate.MAX
+                : date.plusDays(1L);
+    }
+
+    private static LocalDate toInclusiveEndDate(
+            final LocalDate date
+    ) {
+        return LocalDate.MAX.isEqual(date)
+                ? LocalDate.MAX
+                : date.minusDays(1L);
     }
 
     static List<DateRange> findAllIntersections(
@@ -130,6 +145,24 @@ public interface DateRange {
                 .toList();
     }
 
+    static List<DateRange> findAllGaps(
+            final Collection<DateRange> ranges
+    ) {
+        final List<DateRange> sortedIntersections = findUsedIntersections(ranges);
+
+        if (sortedIntersections.isEmpty() || sortedIntersections.size() == 1) {
+            return Collections.emptyList();
+        }
+
+        return IntStream.range(1, sortedIntersections.size())
+                .filter(i -> !sortedIntersections.get(i - 1).endDate().plusDays(1L).isEqual(sortedIntersections.get(i).startDate()))
+                .mapToObj(i -> DateRange.of(
+                        sortedIntersections.get(i - 1).endDate().plusDays(1L),
+                        sortedIntersections.get(i).startDate().minusDays(1L)
+                ))
+                .toList();
+    }
+
     static List<DateRange> merge(
             final Collection<DateRange> dateRanges
     ) {
@@ -160,22 +193,6 @@ public interface DateRange {
                 .toList();
     }
 
-    private static LocalDate toExclusiveEndDate(
-            final LocalDate date
-    ) {
-        return LocalDate.MAX.isEqual(date)
-                ? LocalDate.MAX
-                : date.plusDays(1L);
-    }
-
-    private static LocalDate toInclusiveEndDate(
-            final LocalDate date
-    ) {
-        return LocalDate.MAX.isEqual(date)
-                ? LocalDate.MAX
-                : date.minusDays(1L);
-    }
-
     default boolean isOneDay() {
         return false;
     }
@@ -193,6 +210,19 @@ public interface DateRange {
     boolean intersectsWith(
             DateRange otherRange
     );
+
+    default Optional<DateRange> intersect(
+            final DateRange otherRange
+    ) {
+        if (!intersectsWith(otherRange)) {
+            return Optional.empty();
+        }
+
+        return Optional.of(DateRange.of(
+                LocalDates.max(this.startDate(), otherRange.startDate()),
+                LocalDates.min(this.endDate(), otherRange.endDate())
+        ));
+    }
 
     List<LocalDate> toDays();
 

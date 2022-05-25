@@ -68,10 +68,10 @@ class DateRangeSpecification extends Specification {
     def "find used intersections"() {
 
         when:
-        final Set<DateRange> intersections = DateRange.findUsedIntersections(dateRanges)
+        final List<DateRange> intersections = DateRange.findUsedIntersections(dateRanges)
 
         then:
-        assertThat(intersections).containsExactlyInAnyOrderElementsOf(expectedIntersections)
+        assertThat(intersections).containsExactlyElementsOf(expectedIntersections)
 
         where:
         dateRanges                                                                 | expectedIntersections                                                                                           | comment
@@ -128,10 +128,10 @@ class DateRangeSpecification extends Specification {
     def "group subsequent days"() {
 
         when:
-        final Set<DateRange> groupSubsequentDays = DateRange.groupSubsequentDays(days)
+        final List<DateRange> groupSubsequentDays = DateRange.groupSubsequentDays(days)
 
         then:
-        assertThat(groupSubsequentDays).containsExactlyInAnyOrderElementsOf(expectedDateRanges)
+        assertThat(groupSubsequentDays).containsExactlyElementsOf(expectedDateRanges)
 
         where:
         days                                                                                            | expectedDateRanges
@@ -149,10 +149,10 @@ class DateRangeSpecification extends Specification {
     def "merge"() {
 
         when:
-        final Set<DateRange> mergedDateRanges = DateRange.merge(dateRanges)
+        final List<DateRange> mergedDateRanges = DateRange.merge(dateRanges)
 
         then:
-        assertThat(mergedDateRanges).containsExactlyInAnyOrderElementsOf(expectedDateRanges)
+        assertThat(mergedDateRanges).containsExactlyElementsOf(expectedDateRanges)
 
         where:
         dateRanges                                                                 | expectedDateRanges                                                         | comment
@@ -170,6 +170,33 @@ class DateRangeSpecification extends Specification {
         [range(["2000-01-01", "2000-01-04"]), range1(["2000-01-01",])]             | [range(["2000-01-01", "2000-01-04"])]                                      | "overlap"
         [range(["2000-01-01", "2000-01-04"]), range1(["2000-01-03",])]             | [range(["2000-01-01", "2000-01-04"])]                                      | "overlap"
         [range(["2000-01-01", "2000-01-04"]), range1(["2000-01-04",])]             | [range(["2000-01-01", "2000-01-04"])]                                      | ""
+
+    }
+
+    def "find all gaps"() {
+
+        when:
+        final List<DateRange> gaps = DateRange.findAllGaps(dateRanges)
+
+        then:
+        assertThat(gaps).containsExactlyInAnyOrderElementsOf(expectedGaps)
+
+        where:
+        dateRanges                                                                 | expectedGaps                          | comment
+        []                                                                         | []                                    | ""
+        [range1(["2000-01-01",])]                                                  | []                                    | "1 day"
+        [range(["2000-01-01", "2000-01-31"])]                                      | []                                    | "1 month"
+        [range(["2000-01-01"])]                                                    | []                                    | "non-finite"
+
+        [range1(["2000-01-01",]), range1(["2000-01-03",])]                         | [range1(["2000-01-02",])]             | ""
+
+        [range(["2000-01-01", "2000-01-31"]), range1(["2000-03-01",])]             | [range(["2000-02-01", "2000-02-29"])] | ""
+        [range(["2000-01-01", "2000-01-31"]), range(["2000-03-01", "2000-03-31"])] | [range(["2000-02-01", "2000-02-29"])] | ""
+
+        [range1(["2000-01-01",]), range(["2000-01-03",])]                          | [range1(["2000-01-02",])]             | ""
+        [range(["2000-01-01", "2000-01-31"]), range(["2000-03-01"])]               | [range(["2000-02-01", "2000-02-29"])] | ""
+
+        [range(["2000-01-01"]), range(["2001-01-01"])]                             | []                                    | "non-finite"
 
     }
 
