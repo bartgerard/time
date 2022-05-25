@@ -3,11 +3,31 @@ package be.gerard.time
 import spock.lang.Specification
 import spock.lang.Title
 
+import java.time.LocalDate
+
 import static be.gerard.time.DateRangeTestUtils.*
 import static org.assertj.core.api.Assertions.assertThat
 
 @Title("DateRange Tests")
 class DateRangeSpecification extends Specification {
+
+    def "is one day / is finite"() {
+
+        when:
+        final boolean isOneDay = dateRange.isOneDay()
+        final boolean isFinite = dateRange.isFinite()
+
+        then:
+        assertThat(isOneDay).isEqualTo(expectedOneDayness)
+        assertThat(isFinite).isEqualTo(expectedFiniteness)
+
+        where:
+        dateRange                           | expectedOneDayness | expectedFiniteness
+        range1(["2000-01-01",])             | true               | true
+        range(["2000-01-01", "2000-01-03"]) | false              | true
+        range(["2000-01-01"])               | false              | false
+
+    }
 
     def "length"() {
 
@@ -20,9 +40,9 @@ class DateRangeSpecification extends Specification {
         where:
         dateRange                           | expectedLength
         range1(["2000-01-01",])             | 1
-        range1(["2000-01-01",])             | 1
         range(["2000-01-01", "2000-01-03"]) | 3
         range(["2000-01-01", "2000-01-04"]) | 4
+        range(["2000-01-01"])               | Long.MAX_VALUE
 
     }
 
@@ -197,6 +217,71 @@ class DateRangeSpecification extends Specification {
         [range(["2000-01-01", "2000-01-31"]), range(["2000-03-01"])]               | [range(["2000-02-01", "2000-02-29"])] | ""
 
         [range(["2000-01-01"]), range(["2001-01-01"])]                             | []                                    | "non-finite"
+
+    }
+
+    def "intersect"() {
+
+        when:
+        final Optional<DateRange> intersection = dateRange1.intersect(dateRange2)
+
+        then:
+        assertThat(intersection).isEqualTo(expectedIntersection)
+
+        where:
+        dateRange1                          | dateRange2                          | expectedIntersection
+        range1(["2000-01-01",])             | range1(["2000-01-02",])             | Optional.empty()
+        range1(["2000-01-02",])             | range1(["2000-01-01",])             | Optional.empty()
+        range1(["2000-01-01",])             | range1(["2000-01-01",])             | Optional.of(range1(["2000-01-01",]))
+
+        range(["2000-01-01", "2000-01-05"]) | range(["2000-01-05", "2000-01-08"]) | Optional.of(range1(["2000-01-05",]))
+        range(["2000-01-05", "2000-01-08"]) | range(["2000-01-01", "2000-01-05"]) | Optional.of(range1(["2000-01-05",]))
+        range(["2000-01-01", "2000-01-05"]) | range(["2000-01-04", "2000-01-08"]) | Optional.of(range(["2000-01-04", "2000-01-05"]))
+        range(["2000-01-04", "2000-01-08"]) | range(["2000-01-01", "2000-01-05"]) | Optional.of(range(["2000-01-04", "2000-01-05"]))
+
+        range1(["2000-01-01",])             | range(["2000-01-05"])               | Optional.empty()
+        range(["2000-01-05"])               | range1(["2000-01-01",])             | Optional.empty()
+        range1(["2000-01-10",])             | range(["2000-01-05"])               | Optional.of(range1(["2000-01-10",]))
+        range(["2000-01-05"])               | range1(["2000-01-10",])             | Optional.of(range1(["2000-01-10",]))
+
+        range(["2000-01-01", "2000-01-05"]) | range(["2000-01-05"])               | Optional.of(range1(["2000-01-05",]))
+        range(["2000-01-05"])               | range(["2000-01-01", "2000-01-05"]) | Optional.of(range1(["2000-01-05",]))
+        range(["2000-01-01", "2000-01-05"]) | range(["2000-01-04"])               | Optional.of(range(["2000-01-04", "2000-01-05"]))
+        range(["2000-01-04"])               | range(["2000-01-01", "2000-01-05"]) | Optional.of(range(["2000-01-04", "2000-01-05"]))
+
+        range(["2000-01-01"])               | range(["2000-01-04"])               | Optional.of(range(["2000-01-04"]))
+        range(["2000-01-04"])               | range(["2000-01-01"])               | Optional.of(range(["2000-01-04"]))
+
+    }
+
+    def "to days"() {
+
+        when:
+        final List<LocalDate> days = dateRange.toDays()
+
+        then:
+        assertThat(days).containsExactlyElementsOf(expectedDays)
+
+        where:
+        dateRange                           | expectedDays
+        range1(["2000-01-01",])             | [day("2000-01-01")]
+        range(["2000-01-01", "2000-01-05"]) | [day("2000-01-01"), day("2000-01-02"), day("2000-01-03"), day("2000-01-04"), day("2000-01-05")]
+
+    }
+
+    def "display as String"() {
+
+        when:
+        final String displayString = dateRange.displayString()
+
+        then:
+        assertThat(displayString).isEqualTo(expectedDisplayString)
+
+        where:
+        dateRange                           | expectedDisplayString
+        range1(["2000-01-01",])             | "[2000-01-01]"
+        range(["2000-01-01", "2000-01-03"]) | "[2000-01-01,2000-01-03]"
+        range(["2000-01-01",])              | "[2000-01-01,["
 
     }
 
