@@ -32,7 +32,7 @@
     </distributionManagement>
 
     <properties>
-        <java.version>18</java.version>
+        <java.version>17</java.version>
 
         <maven-surefire-plugin.version>3.0.0-M6</maven-surefire-plugin.version>
         <gmavenplus-plugin.version>1.13.1</gmavenplus-plugin.version>
