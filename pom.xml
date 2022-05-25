@@ -12,11 +12,28 @@
     <groupId>be.gerard</groupId>
     <artifactId>time</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+
     <name>time</name>
     <description>time</description>
 
+    <developers>
+        <developer>
+            <id>bart.gerard</id>
+            <name>Bart Gerard</name>
+        </developer>
+    </developers>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub OWNE Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/bartgerard/time</url>
+        </repository>
+    </distributionManagement>
+
     <properties>
         <java.version>18</java.version>
+
         <maven-surefire-plugin.version>3.0.0-M6</maven-surefire-plugin.version>
         <gmavenplus-plugin.version>1.13.1</gmavenplus-plugin.version>
     </properties>
