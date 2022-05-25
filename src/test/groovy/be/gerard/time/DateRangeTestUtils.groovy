@@ -1,9 +1,9 @@
-package be.gerard.time.api
+package be.gerard.time
 
-
-import org.apache.commons.lang3.Validate
 
 import java.time.LocalDate
+
+import static org.apache.commons.lang3.Validate.notEmpty
 
 class DateRangeTestUtils {
 
@@ -16,7 +16,7 @@ class DateRangeTestUtils {
     static DateRange range1(
             final List<String> rangeAsString
     ) {
-        Validate.notEmpty(rangeAsString)
+        notEmpty(rangeAsString)
 
         return DateRange.ofOneDay(day(rangeAsString.get(0)))
     }
@@ -24,7 +24,7 @@ class DateRangeTestUtils {
     static DateRange range(
             final List<String> rangeAsString
     ) {
-        Validate.notEmpty(rangeAsString)
+        notEmpty(rangeAsString)
 
         if (rangeAsString.size() == 1) {
             return DateRange.startingOn(day(rangeAsString.get(0)))
