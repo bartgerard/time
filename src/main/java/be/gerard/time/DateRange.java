@@ -13,11 +13,7 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public interface DateRange {
-
-    LocalDate startDate();
-
-    LocalDate endDate();
+public interface DateRange extends DateRangeBased {
 
     static DateRange of(
             final LocalDate startDate,
@@ -192,6 +188,15 @@ public interface DateRange {
                 ))
                 .toList();
     }
+
+    @Override
+    default DateRange range() {
+        return this;
+    }
+
+    LocalDate startDate();
+
+    LocalDate endDate();
 
     default boolean isOneDay() {
         return false;
