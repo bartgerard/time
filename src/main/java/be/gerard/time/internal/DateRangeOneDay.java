@@ -3,6 +3,7 @@ package be.gerard.time.internal;
 import be.gerard.time.DateRange;
 
 import java.time.LocalDate;
+import java.time.temporal.TemporalUnit;
 import java.util.List;
 
 import static org.apache.commons.lang3.Validate.notNull;
@@ -48,6 +49,11 @@ public record DateRangeOneDay(
     @Override
     public String displayString() {
         return "[%s]".formatted(startDate());
+    }
+
+    @Override
+    public List<DateRange> splitByTemporalUnit(final TemporalUnit temporalUnit) {
+        return List.of(this);
     }
 
 }

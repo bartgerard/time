@@ -4,6 +4,7 @@ import spock.lang.Specification
 import spock.lang.Title
 
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 import static be.gerard.time.DateRangeTestUtils.*
 import static org.assertj.core.api.Assertions.assertThat
@@ -282,6 +283,31 @@ class DateRangeSpecification extends Specification {
         range1(["2000-01-01",])             | "[2000-01-01]"
         range(["2000-01-01", "2000-01-03"]) | "[2000-01-01,2000-01-03]"
         range(["2000-01-01",])              | "[2000-01-01,["
+
+    }
+
+    def "split by temporal unit"() {
+
+        when:
+        final List<DateRange> splitRanges = dateRange.splitByTemporalUnit(temporalUnit)
+
+        then:
+        assertThat(splitRanges).isEqualTo(expectedSplit)
+
+        where:
+        dateRange                           | temporalUnit      | expectedSplit                                                              | comment
+        range1(["2000-01-01",])             | ChronoUnit.MONTHS | [range1(["2000-01-01",])]                                                  | ""
+        range1(["2000-01-01",])             | ChronoUnit.YEARS  | [range1(["2000-01-01",])]                                                  | ""
+
+        range(["2000-12-01", "2000-12-31"]) | ChronoUnit.MONTHS | [range(["2000-12-01", "2000-12-31"])]                                      | ""
+        range(["2000-11-01", "2000-12-31"]) | ChronoUnit.MONTHS | [range(["2000-11-01", "2000-11-30"]), range(["2000-12-01", "2000-12-31"])] | ""
+        range(["2000-12-15", "2001-01-15"]) | ChronoUnit.MONTHS | [range(["2000-12-15", "2000-12-31"]), range(["2001-01-01", "2001-01-15"])] | ""
+
+        range(["2000-01-01", "2000-01-03"]) | ChronoUnit.YEARS  | [range(["2000-01-01", "2000-01-03"])]                                      | ""
+        range(["2000-01-01", "2001-01-03"]) | ChronoUnit.YEARS  | [range(["2000-01-01", "2000-12-31"]), range(["2001-01-01", "2001-01-03"])] | ""
+        range(["2000-01-01", "2001-01-01"]) | ChronoUnit.YEARS  | [range(["2000-01-01", "2000-12-31"]), range1(["2001-01-01",])]             | ""
+        range(["2000-12-01", "2001-01-01"]) | ChronoUnit.YEARS  | [range(["2000-12-01", "2000-12-31"]), range1(["2001-01-01",])]             | ""
+        range(["2000-12-31", "2001-01-01"]) | ChronoUnit.YEARS  | [range1(["2000-12-31",]), range1(["2001-01-01",])]                         | ""
 
     }
 
