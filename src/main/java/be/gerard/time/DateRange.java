@@ -14,6 +14,12 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static java.util.Comparator.comparing;
+import static java.util.function.Function.identity;
+import static org.apache.commons.lang3.Validate.notNull;
+
 public interface DateRange extends DateRangeBased {
 
     static DateRange of(
@@ -235,5 +241,62 @@ public interface DateRange extends DateRangeBased {
     String displayString();
 
     List<DateRange> splitByTemporalUnit(TemporalUnit temporalUnit);
+
+    default List<DateRange> subtract(final Collection<DateRange> subtrahends) {
+        final List<DateRange> applicableSubtrahends = subtrahends.stream()
+                .filter(this::intersectsWith)
+                .toList();
+
+        if (applicableSubtrahends.isEmpty()) {
+            return singletonList(this);
+        } else if (applicableSubtrahends.size() == 1) {
+            return subtract(applicableSubtrahends.get(0));
+        }
+
+        final List<DateRange> innerGaps = findAllGaps(applicableSubtrahends)
+                .stream()
+                .filter(this::intersectsWith)
+                .toList();
+
+        final List<DateRange> outerGaps = subtract(DateRange.of(
+                applicableSubtrahends.stream()
+                        .map(DateRange::startDate)
+                        .min(comparing(identity()))
+                        .orElse(LocalDate.MIN),
+                applicableSubtrahends.stream()
+                        .map(DateRange::endDate)
+                        .max(comparing(identity()))
+                        .orElse(LocalDate.MAX)
+        ));
+
+        return Stream.concat(
+                        innerGaps.stream(),
+                        outerGaps.stream()
+                )
+                .sorted(comparing(DateRange::startDate)
+                        .thenComparing(DateRange::endDate)
+                )
+                .toList();
+    }
+
+    default List<DateRange> subtract(final DateRange subtrahend) {
+        notNull(subtrahend);
+
+        if (equals(subtrahend)) {
+            return emptyList();
+        } else if (!intersectsWith(subtrahend)) {
+            return singletonList(this);
+        }
+
+        return Stream.concat(
+                        startDate().isBefore(subtrahend.startDate())
+                                ? Stream.of(DateRange.of(startDate(), subtrahend.startDate().minusDays(1L)))
+                                : Stream.empty(),
+                        subtrahend.endDate().isBefore(endDate())
+                                ? Stream.of(DateRange.of(subtrahend.endDate().plusDays(1L), endDate()))
+                                : Stream.empty()
+                )
+                .toList();
+    }
 
 }
