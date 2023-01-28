@@ -28,40 +28,46 @@ public record DateRangeEndInclusive(
 
     @Override
     public long length() {
-        return ChronoUnit.DAYS.between(startDate(), endDate()) + 1;
+        return ChronoUnit.DAYS.between(this.startDate, this.endDate) + 1;
     }
 
     @Override
     public boolean containsDay(final LocalDate day) {
-        return !day.isBefore(startDate()) && !day.isAfter(endDate());
+        return !day.isBefore(this.startDate) && !day.isAfter(this.endDate);
     }
 
     @Override
-    public boolean intersectsWith(final DateRange otherRange) {
-        return !otherRange.endDate().isBefore(this.startDate())
-                && !otherRange.startDate().isAfter(this.endDate());
+    public boolean containsRange(final DateRange range) {
+        return !this.startDate.isAfter(range.startDate())
+                && !this.endDate.isBefore(range.endDate());
     }
 
     @Override
-    public List<LocalDate> toDays() {
-        return startDate().datesUntil(endDate().plusDays(1L)).toList();
+    public boolean isIntersectingWith(final DateRange otherRange) {
+        return !otherRange.endDate().isBefore(this.startDate)
+                && !otherRange.startDate().isAfter(this.endDate);
     }
 
     @Override
-    public String displayString() {
-        return "[%s,%s]".formatted(startDate(), endDate());
+    public List<LocalDate> asDays() {
+        return this.startDate.datesUntil(endDate().plusDays(1L)).toList();
+    }
+
+    @Override
+    public String asText() {
+        return "[%s,%s]".formatted(this.startDate, this.endDate);
     }
 
     @Override
     public List<DateRange> splitByTemporalUnit(final TemporalUnit temporalUnit) {
         isTrue(temporalUnit.isDateBased(), "dateRange.splitByTemporalUnit only allows date based units");
 
-        final LocalDate start = startDate().with(firstDayOfYear());
+        final LocalDate start = this.startDate.with(firstDayOfYear());
 
         final List<LocalDate> startDaysBetween = LongStream.iterate(0, i -> i + 1)
                 .mapToObj(i -> start.plus(i, temporalUnit))
-                .filter(day -> day.isAfter(startDate()))
-                .takeWhile(day -> !day.isAfter(endDate()))
+                .filter(day -> day.isAfter(this.startDate))
+                .takeWhile(day -> !day.isAfter(this.endDate))
                 .toList();
 
         if (startDaysBetween.isEmpty()) {
@@ -69,7 +75,7 @@ public record DateRangeEndInclusive(
         }
 
         final List<LocalDate> allStartDays = Stream.concat(
-                        Stream.of(startDate()),
+                        Stream.of(this.startDate),
                         startDaysBetween.stream()
                 )
                 .toList();
@@ -82,7 +88,7 @@ public record DateRangeEndInclusive(
                                 )),
                         Stream.of(DateRange.of(
                                 allStartDays.get(allStartDays.size() - 1),
-                                endDate()
+                                this.endDate
                         ))
                 )
                 .toList();

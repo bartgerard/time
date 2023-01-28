@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -18,6 +19,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
 import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.apache.commons.lang3.Validate.notNull;
 
 public interface DateRange extends DateRangeBased {
@@ -196,6 +198,15 @@ public interface DateRange extends DateRangeBased {
                 .toList();
     }
 
+    static List<LocalDate> asDays(
+            final Collection<DateRange> ranges
+    ) {
+        return ranges.stream()
+                .map(range -> range.asDays())
+                .flatMap(List::stream)
+                .toList();
+    }
+
     @Override
     default DateRange range() {
         return this;
@@ -219,32 +230,67 @@ public interface DateRange extends DateRangeBased {
             LocalDate day
     );
 
-    boolean intersectsWith(
+    boolean containsRange(
+            DateRange range
+    );
+
+    boolean isIntersectingWith(
             DateRange otherRange
     );
 
     default Optional<DateRange> intersect(
             final DateRange otherRange
     ) {
-        if (!intersectsWith(otherRange)) {
+        if (!isIntersectingWith(otherRange)) {
             return Optional.empty();
         }
 
         return Optional.of(DateRange.of(
-                LocalDates.max(this.startDate(), otherRange.startDate()),
-                LocalDates.min(this.endDate(), otherRange.endDate())
+                LocalDates.max(startDate(), otherRange.startDate()),
+                LocalDates.min(endDate(), otherRange.endDate())
         ));
     }
 
-    List<LocalDate> toDays();
+    List<LocalDate> asDays();
 
-    String displayString();
+    String asText();
 
     List<DateRange> splitByTemporalUnit(TemporalUnit temporalUnit);
 
+    default Set<DateRange> splitByDay(
+            final LocalDate day
+    ) {
+        notNull(day);
+
+        if (containsDay(day) && !startDate().isEqual(day)) {
+            return Set.of(
+                    DateRange.of(startDate(), day.minusDays(1L)),
+                    DateRange.of(day, endDate())
+            );
+        }
+
+        return Set.of(this);
+    }
+
+    default Set<DateRange> splitByRange(
+            final DateRange range
+    ) {
+        notNull(range);
+
+        if (!isIntersectingWith(range) || range.containsRange(this)) {
+            return Set.of(this);
+        }
+
+        return Stream.concat(
+                        subtract(range).stream(),
+                        intersect(range).stream()
+                )
+                .collect(toUnmodifiableSet());
+    }
+
     default List<DateRange> subtract(final Collection<DateRange> subtrahends) {
         final List<DateRange> applicableSubtrahends = subtrahends.stream()
-                .filter(this::intersectsWith)
+                .filter(this::isIntersectingWith)
                 .toList();
 
         if (applicableSubtrahends.isEmpty()) {
@@ -255,7 +301,7 @@ public interface DateRange extends DateRangeBased {
 
         final List<DateRange> innerGaps = findAllGaps(applicableSubtrahends)
                 .stream()
-                .filter(this::intersectsWith)
+                .filter(this::isIntersectingWith)
                 .toList();
 
         final List<DateRange> outerGaps = subtract(DateRange.of(
@@ -284,7 +330,7 @@ public interface DateRange extends DateRangeBased {
 
         if (equals(subtrahend)) {
             return emptyList();
-        } else if (!intersectsWith(subtrahend)) {
+        } else if (!isIntersectingWith(subtrahend)) {
             return singletonList(this);
         }
 
@@ -292,7 +338,7 @@ public interface DateRange extends DateRangeBased {
                         startDate().isBefore(subtrahend.startDate())
                                 ? Stream.of(DateRange.of(startDate(), subtrahend.startDate().minusDays(1L)))
                                 : Stream.empty(),
-                        subtrahend.endDate().isBefore(endDate())
+                        subtrahend.isFinite() && subtrahend.endDate().isBefore(endDate())
                                 ? Stream.of(DateRange.of(subtrahend.endDate().plusDays(1L), endDate()))
                                 : Stream.empty()
                 )

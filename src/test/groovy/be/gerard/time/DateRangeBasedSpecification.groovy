@@ -7,7 +7,7 @@ import static be.gerard.time.DateRangeTestUtils.range
 import static be.gerard.time.DateRangeTestUtils.range1
 import static org.assertj.core.api.Assertions.assertThat
 
-@Title("DateRangeBased Tests")
+@Title("DateRangeBased")
 class DateRangeBasedSpecification extends Specification {
 
     def "group overlapping ranges"() {

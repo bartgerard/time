@@ -37,17 +37,22 @@ public record DateRangeInfinite(
     }
 
     @Override
-    public boolean intersectsWith(final DateRange otherRange) {
-        return !this.startDate().isAfter(otherRange.endDate());
+    public boolean containsRange(final DateRange range) {
+        return !this.startDate.isAfter(range.startDate());
     }
 
     @Override
-    public List<LocalDate> toDays() {
+    public boolean isIntersectingWith(final DateRange otherRange) {
+        return !this.startDate.isAfter(otherRange.endDate());
+    }
+
+    @Override
+    public List<LocalDate> asDays() {
         throw new UnsupportedOperationException("dateRange.toDays() can not be applied to infinite ranges");
     }
 
     @Override
-    public String displayString() {
+    public String asText() {
         return "[%s,[".formatted(startDate());
     }
 

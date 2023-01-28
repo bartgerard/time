@@ -5,6 +5,7 @@ import be.gerard.time.DateRange;
 import java.time.LocalDate;
 import java.time.temporal.TemporalUnit;
 import java.util.List;
+import java.util.Set;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
@@ -33,27 +34,45 @@ public record DateRangeOneDay(
 
     @Override
     public boolean containsDay(final LocalDate day) {
-        return startDate().isEqual(day);
+        return this.startDate.isEqual(day);
     }
 
     @Override
-    public boolean intersectsWith(final DateRange otherRange) {
-        return otherRange.containsDay(startDate());
+    public boolean containsRange(final DateRange range) {
+        return this.startDate.isEqual(range.startDate())
+                && this.startDate.isEqual(range.endDate());
     }
 
     @Override
-    public List<LocalDate> toDays() {
-        return List.of(startDate());
+    public boolean isIntersectingWith(final DateRange otherRange) {
+        return otherRange.containsDay(this.startDate);
     }
 
     @Override
-    public String displayString() {
-        return "[%s]".formatted(startDate());
+    public List<LocalDate> asDays() {
+        return List.of(this.startDate);
+    }
+
+    @Override
+    public String asText() {
+        return "[%s]".formatted(this.startDate);
     }
 
     @Override
     public List<DateRange> splitByTemporalUnit(final TemporalUnit temporalUnit) {
         return List.of(this);
+    }
+
+    @Override
+    public Set<DateRange> splitByDay(
+            final LocalDate day
+    ) {
+        return Set.of(this);
+    }
+
+    @Override
+    public Set<DateRange> splitByRange(final DateRange range) {
+        return Set.of(this);
     }
 
 }
