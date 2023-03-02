@@ -23,7 +23,7 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.apache.commons.lang3.Validate.notNull;
 
-public interface DateRange extends DateRangeBased {
+public sealed interface DateRange extends DateRangeBased permits DateRangeOneDay, DateRangeEndInclusive, DateRangeInfinite {
 
     static DateRange of(
             final LocalDate startDate,
