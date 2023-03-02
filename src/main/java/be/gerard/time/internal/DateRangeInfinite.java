@@ -3,6 +3,7 @@ package be.gerard.time.internal;
 import be.gerard.time.DateRange;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.temporal.TemporalUnit;
 import java.util.List;
 
@@ -48,7 +49,12 @@ public record DateRangeInfinite(
 
     @Override
     public List<LocalDate> asDays() {
-        throw new UnsupportedOperationException("dateRange.toDays() can not be applied to infinite ranges");
+        throw new UnsupportedOperationException("dateRange.asDays() can not be applied to infinite ranges");
+    }
+
+    @Override
+    public List<YearMonth> asMonths() {
+        throw new UnsupportedOperationException("dateRange.asMonths() can not be applied to infinite ranges");
     }
 
     @Override

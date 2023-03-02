@@ -3,6 +3,7 @@ package be.gerard.time.internal;
 import be.gerard.time.DateRange;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.temporal.TemporalUnit;
 import java.util.List;
 import java.util.Set;
@@ -51,6 +52,11 @@ public record DateRangeOneDay(
     @Override
     public List<LocalDate> asDays() {
         return List.of(this.startDate);
+    }
+
+    @Override
+    public List<YearMonth> asMonths() {
+        return List.of(YearMonth.from(this.startDate));
     }
 
     @Override

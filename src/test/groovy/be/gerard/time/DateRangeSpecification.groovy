@@ -4,6 +4,7 @@ import spock.lang.Specification
 import spock.lang.Title
 
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
 import static be.gerard.time.DateRangeTestUtils.*
@@ -318,6 +319,25 @@ class DateRangeSpecification extends Specification {
         dateRange                           | expectedDays
         range1(["2000-01-01",])             | [day("2000-01-01")]
         range(["2000-01-01", "2000-01-05"]) | [day("2000-01-01"), day("2000-01-02"), day("2000-01-03"), day("2000-01-04"), day("2000-01-05")]
+
+    }
+
+    def "as months"() {
+
+        when:
+        final List<YearMonth> months = dateRange.asMonths()
+
+        then:
+        assertThat(months).containsExactlyElementsOf(expectedMonths)
+
+        where:
+        dateRange                           | expectedMonths
+        range1(["2000-01-01",])             | [month("2000-01")]
+        range(["2000-01-01", "2000-01-31"]) | [month("2000-01")]
+        range(["2000-01-15", "2000-01-31"]) | [month("2000-01")]
+        range(["2000-01-01", "2000-02-01"]) | [month("2000-01"), month("2000-02")]
+        range(["2000-01-15", "2000-02-01"]) | [month("2000-01"), month("2000-02")]
+        range(["2000-01-01", "2000-05-31"]) | [month("2000-01"), month("2000-02"), month("2000-03"), month("2000-04"), month("2000-05")]
 
     }
 

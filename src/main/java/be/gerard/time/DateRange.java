@@ -5,6 +5,7 @@ import be.gerard.time.internal.DateRangeInfinite;
 import be.gerard.time.internal.DateRangeOneDay;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.temporal.TemporalUnit;
 import java.util.Arrays;
 import java.util.Collection;
@@ -252,6 +253,8 @@ public interface DateRange extends DateRangeBased {
     }
 
     List<LocalDate> asDays();
+
+    List<YearMonth> asMonths();
 
     String asText();
 

@@ -2,6 +2,7 @@ package be.gerard.time
 
 
 import java.time.LocalDate
+import java.time.YearMonth
 
 import static org.apache.commons.lang3.Validate.notEmpty
 
@@ -11,6 +12,12 @@ class DateRangeTestUtils {
             final String dayAsString
     ) {
         return LocalDate.parse(dayAsString)
+    }
+
+    static YearMonth month(
+            final String monthAsString
+    ) {
+        return YearMonth.parse(monthAsString)
     }
 
     static DateRange range1(

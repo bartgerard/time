@@ -3,6 +3,7 @@ package be.gerard.time.internal;
 import be.gerard.time.DateRange;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static java.time.temporal.TemporalAdjusters.firstDayOfYear;
+import static java.util.function.Predicate.not;
 import static org.apache.commons.lang3.Validate.isTrue;
 import static org.apache.commons.lang3.Validate.notNull;
 
@@ -51,6 +53,16 @@ public record DateRangeEndInclusive(
     @Override
     public List<LocalDate> asDays() {
         return this.startDate.datesUntil(endDate().plusDays(1L)).toList();
+    }
+
+    @Override
+    public List<YearMonth> asMonths() {
+        final YearMonth startMonth = YearMonth.from(this.startDate);
+        final YearMonth endMonth = YearMonth.from(this.endDate);
+        return LongStream.iterate(0, i -> i + 1)
+                .mapToObj(startMonth::plusMonths)
+                .takeWhile(not(endMonth::isBefore))
+                .toList();
     }
 
     @Override
