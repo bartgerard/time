@@ -7,12 +7,7 @@ import be.gerard.time.internal.DateRangeOneDay;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.temporal.TemporalUnit;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -203,8 +198,19 @@ public sealed interface DateRange extends DateRangeBased permits DateRangeOneDay
             final Collection<DateRange> ranges
     ) {
         return ranges.stream()
-                .map(range -> range.asDays())
+                .map(DateRange::asDays)
                 .flatMap(List::stream)
+                .toList();
+    }
+
+    static <T extends DateRangeBased> List<T> sort(
+            final Collection<T> ranges
+    ) {
+        return ranges.stream()
+                .sorted(comparing(
+                        DateRangeBased::range,
+                        comparing(DateRange::startDate).thenComparing(DateRange::endDate)
+                ))
                 .toList();
     }
 
