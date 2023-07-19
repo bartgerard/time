@@ -59,7 +59,7 @@ public record DateRangeInfinite(
 
     @Override
     public String asText() {
-        return "[%s,[".formatted(startDate());
+        return "%s..".formatted(startDate());
     }
 
     @Override

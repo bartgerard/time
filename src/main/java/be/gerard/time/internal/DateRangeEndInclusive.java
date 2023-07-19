@@ -67,7 +67,7 @@ public record DateRangeEndInclusive(
 
     @Override
     public String asText() {
-        return "[%s,%s]".formatted(this.startDate, this.endDate);
+        return "%s..%s".formatted(this.startDate, this.endDate);
     }
 
     @Override

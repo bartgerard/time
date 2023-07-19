@@ -20,6 +20,20 @@ class DateRangeTestUtils {
         return YearMonth.parse(monthAsString)
     }
 
+    static DateRange range(
+            final String rangeAsString
+    ) {
+        return DateRange.parse(rangeAsString)
+    }
+
+    static List<DateRange> ranges(
+            final List<String> rangesAsString
+    ) {
+        return rangesAsString.stream()
+                .map { DateRange.parse(it) }
+                .toList()
+    }
+
     static DateRange range1(
             final List<String> rangeAsString
     ) {

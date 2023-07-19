@@ -16,6 +16,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toUnmodifiableSet;
+import static org.apache.commons.lang3.Validate.notEmpty;
 import static org.apache.commons.lang3.Validate.notNull;
 
 public sealed interface DateRange extends DateRangeBased permits DateRangeOneDay, DateRangeEndInclusive, DateRangeInfinite {
@@ -30,6 +31,42 @@ public sealed interface DateRange extends DateRangeBased permits DateRangeOneDay
             return startingOn(startDate);
         } else {
             return withEndInclusive(startDate, endDate);
+        }
+    }
+
+    /**
+     * Parse the given value into the corresponding DateRange.
+     * <p>
+     * (?<startDate>\\d{4}-\\d{2}-\\d{2})(?:(?<dots>\\.{2})(?<endDate>\\d{4}-\\d{2}-\\d{2})?)?
+     * <p>
+     * startDate          -> ONE DAY
+     * startDate..        -> INFINITE
+     * startDate..endDate -> END INCLUSIVE
+     *
+     * @param value String representing a DateRange
+     * @return DateRange
+     */
+    static DateRange parse(
+            final String value
+    ) {
+        notEmpty(value);
+
+        final String[] dates = value.split("\\.\\.");
+
+        if (dates.length == 1) {
+            final LocalDate startDate = LocalDate.parse(dates[0]);
+            return value.contains("..")
+                    ? startingOn(startDate)
+                    : ofOneDay(startDate);
+        } else if (dates.length == 2) {
+            return withEndInclusive(
+                    LocalDate.parse(dates[0]),
+                    LocalDate.parse(dates[1])
+            );
+        } else {
+            throw new IllegalArgumentException(
+                    "The value is not a valid range [value=%s]".formatted(value)
+            );
         }
     }
 

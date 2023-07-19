@@ -61,7 +61,7 @@ public record DateRangeOneDay(
 
     @Override
     public String asText() {
-        return "[%s]".formatted(this.startDate);
+        return "%s".formatted(this.startDate);
     }
 
     @Override
