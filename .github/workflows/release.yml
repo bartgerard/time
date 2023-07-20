@@ -42,7 +42,7 @@ jobs:
       - name: Set version to ${{ github.event.inputs.version }}
         run: mvn --batch-mode -e clean versions:set -DnewVersion=${{ github.event.inputs.version }} versions:commit
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT_FOR_ACTIONS_TOKEN }}
+          GITHUB_TOKEN_REF: ${{ secrets.GH_PAT_FOR_ACTIONS_TOKEN }}
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml
@@ -50,4 +50,4 @@ jobs:
       - name: Publish to GitHub Packages Apache Maven
         run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT_FOR_ACTIONS_TOKEN }}
+          GITHUB_TOKEN_REF: ${{ secrets.GH_PAT_FOR_ACTIONS_TOKEN }}
