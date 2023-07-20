@@ -32,12 +32,6 @@ jobs:
           server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
           settings-path: ${{ github.workspace }} # location for the settings.xml file
 
-      - name: maven-settings
-        uses: s4u/maven-settings-action@v2
-        with:
-          servers: '[{"id": "github", "username": "dummy", "password": "${GITHUB_TOKEN}"}]'
-          githubServer: false
-
       - name: Set version to ${{ github.event.inputs.version }}
         run: mvn --batch-mode -e clean versions:set -DnewVersion=${{ github.event.inputs.version }} versions:commit
 
