@@ -6,7 +6,7 @@
     <parent>
         <groupId>be.gerard</groupId>
         <artifactId>parent</artifactId>
-        <version>0.0.2</version>
+        <version>0.0.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -37,5 +37,9 @@
             </snapshots>
         </repository>
     </repositories>
+
+    <properties>
+        <maven.deploy.skip>false</maven.deploy.skip>
+    </properties>
 
 </project>

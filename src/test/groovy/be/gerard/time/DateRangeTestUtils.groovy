@@ -27,7 +27,7 @@ class DateRangeTestUtils {
             final List<String> rangesAsString
     ) {
         return rangesAsString.stream()
-                .map { DateRange.parse(it) }
+                .map { range(it) }
                 .toList()
     }
 
