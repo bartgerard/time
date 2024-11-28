@@ -7,17 +7,22 @@ import be.gerard.time.internal.DateRangeOneDay;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.temporal.TemporalUnit;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
+import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.apache.commons.lang3.Validate.notEmpty;
-import static org.apache.commons.lang3.Validate.notNull;
 
 public sealed interface DateRange extends DateRangeBased permits DateRangeOneDay, DateRangeEndInclusive, DateRangeInfinite {
 
@@ -32,6 +37,14 @@ public sealed interface DateRange extends DateRangeBased permits DateRangeOneDay
         } else {
             return withEndInclusive(startDate, endDate);
         }
+    }
+
+    static List<DateRange> parse(
+            final Collection<String> values
+    ) {
+        return values.stream()
+                .map(DateRange::parse)
+                .toList();
     }
 
     /**
@@ -103,7 +116,7 @@ public sealed interface DateRange extends DateRangeBased permits DateRangeOneDay
         if (sortedDays.isEmpty()) {
             return Collections.emptyList();
         } else if (sortedDays.size() == 1) {
-            return List.of(ofOneDay(sortedDays.get(0)));
+            return List.of(ofOneDay(sortedDays.getFirst()));
         }
 
         final int[] nonConsecutiveIndices = IntStream.range(1, sortedDays.size())
@@ -125,7 +138,7 @@ public sealed interface DateRange extends DateRangeBased permits DateRangeOneDay
                 .toList();
     }
 
-    private static LocalDate toExclusiveEndDate(
+    static LocalDate toExclusiveEndDate(
             final LocalDate date
     ) {
         return LocalDate.MAX.isEqual(date)
@@ -133,7 +146,7 @@ public sealed interface DateRange extends DateRangeBased permits DateRangeOneDay
                 : date.plusDays(1L);
     }
 
-    private static LocalDate toInclusiveEndDate(
+    static LocalDate toInclusiveEndDate(
             final LocalDate date
     ) {
         return LocalDate.MAX.isEqual(date)
@@ -160,7 +173,7 @@ public sealed interface DateRange extends DateRangeBased permits DateRangeOneDay
                 .toList();
 
         if (borderDays.size() == 1) {
-            return List.of(DateRange.ofOneDay(borderDays.get(0)));
+            return List.of(DateRange.ofOneDay(borderDays.getFirst()));
         }
 
         return IntStream.range(1, borderDays.size())
@@ -209,7 +222,7 @@ public sealed interface DateRange extends DateRangeBased permits DateRangeOneDay
         if (sortedIntersections.isEmpty()) {
             return Collections.emptyList();
         } else if (sortedIntersections.size() == 1) {
-            return List.of(sortedIntersections.get(0));
+            return List.of(sortedIntersections.getFirst());
         }
 
         final int[] nonConsecutiveIndices = IntStream.range(1, sortedIntersections.size())
@@ -234,10 +247,7 @@ public sealed interface DateRange extends DateRangeBased permits DateRangeOneDay
     static List<LocalDate> asDays(
             final Collection<DateRange> ranges
     ) {
-        return ranges.stream()
-                .map(DateRange::asDays)
-                .flatMap(List::stream)
-                .toList();
+        return Days.within(ranges);
     }
 
     static <T extends DateRangeBased> List<T> sort(
@@ -306,7 +316,7 @@ public sealed interface DateRange extends DateRangeBased permits DateRangeOneDay
     default Set<DateRange> splitByDay(
             final LocalDate day
     ) {
-        notNull(day);
+        requireNonNull(day);
 
         if (containsDay(day) && !startDate().isEqual(day)) {
             return Set.of(
@@ -321,7 +331,7 @@ public sealed interface DateRange extends DateRangeBased permits DateRangeOneDay
     default Set<DateRange> splitByRange(
             final DateRange range
     ) {
-        notNull(range);
+        requireNonNull(range);
 
         if (!isIntersectingWith(range) || range.containsRange(this)) {
             return Set.of(this);
@@ -342,7 +352,7 @@ public sealed interface DateRange extends DateRangeBased permits DateRangeOneDay
         if (applicableSubtrahends.isEmpty()) {
             return singletonList(this);
         } else if (applicableSubtrahends.size() == 1) {
-            return subtract(applicableSubtrahends.get(0));
+            return subtract(applicableSubtrahends.getFirst());
         }
 
         final List<DateRange> innerGaps = findAllGaps(applicableSubtrahends)
@@ -372,7 +382,7 @@ public sealed interface DateRange extends DateRangeBased permits DateRangeOneDay
     }
 
     default List<DateRange> subtract(final DateRange subtrahend) {
-        notNull(subtrahend);
+        requireNonNull(subtrahend);
 
         if (equals(subtrahend)) {
             return emptyList();

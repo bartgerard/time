@@ -3,7 +3,9 @@ package be.gerard.time
 import spock.lang.Specification
 import spock.lang.Title
 
-import static be.gerard.time.DateRangeTestUtils.*
+import static be.gerard.time.DateRangeTestUtils.day
+import static be.gerard.time.DateRangeTestUtils.range
+import static be.gerard.time.DateRangeTestUtils.ranges
 import static org.assertj.core.api.Assertions.assertThat
 
 @Title("DateRanges")

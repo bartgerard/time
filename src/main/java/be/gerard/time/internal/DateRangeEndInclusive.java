@@ -12,9 +12,9 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static java.time.temporal.TemporalAdjusters.firstDayOfYear;
+import static java.util.Objects.requireNonNull;
 import static java.util.function.Predicate.not;
 import static org.apache.commons.lang3.Validate.isTrue;
-import static org.apache.commons.lang3.Validate.notNull;
 
 public record DateRangeEndInclusive(
         LocalDate startDate,
@@ -22,8 +22,8 @@ public record DateRangeEndInclusive(
 ) implements DateRange {
 
     public DateRangeEndInclusive {
-        notNull(startDate, "dateRange.startDate is invalid [null]");
-        notNull(endDate, "dateRange.endDate is invalid [null]");
+        requireNonNull(startDate, "dateRange.startDate is invalid [null]");
+        requireNonNull(endDate, "dateRange.endDate is invalid [null]");
 
         isTrue(!startDate.isAfter(endDate), "dateRange.endDate should be after dateRange.startDate");
     }
@@ -99,7 +99,7 @@ public record DateRangeEndInclusive(
                                         allStartDays.get(i + 1).minusDays(1L)
                                 )),
                         Stream.of(DateRange.of(
-                                allStartDays.get(allStartDays.size() - 1),
+                                allStartDays.getLast(),
                                 this.endDate
                         ))
                 )

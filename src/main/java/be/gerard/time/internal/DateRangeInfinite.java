@@ -7,14 +7,14 @@ import java.time.YearMonth;
 import java.time.temporal.TemporalUnit;
 import java.util.List;
 
-import static org.apache.commons.lang3.Validate.notNull;
+import static java.util.Objects.requireNonNull;
 
 public record DateRangeInfinite(
         LocalDate startDate
 ) implements DateRange {
 
     public DateRangeInfinite {
-        notNull(startDate, "dateRange.startDate is invalid [null]");
+        requireNonNull(startDate, "dateRange.startDate is invalid [null]");
     }
 
     @Override

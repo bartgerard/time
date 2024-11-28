@@ -8,14 +8,14 @@ import java.time.temporal.TemporalUnit;
 import java.util.List;
 import java.util.Set;
 
-import static org.apache.commons.lang3.Validate.notNull;
+import static java.util.Objects.requireNonNull;
 
 public record DateRangeOneDay(
         LocalDate startDate
 ) implements DateRange {
 
     public DateRangeOneDay {
-        notNull(startDate, "dateRange.startDate is invalid [null]");
+        requireNonNull(startDate, "dateRange.startDate is invalid [null]");
     }
 
     @Override

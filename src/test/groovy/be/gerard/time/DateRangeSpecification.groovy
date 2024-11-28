@@ -7,7 +7,10 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
-import static be.gerard.time.DateRangeTestUtils.*
+import static be.gerard.time.DateRangeTestUtils.day
+import static be.gerard.time.DateRangeTestUtils.month
+import static be.gerard.time.DateRangeTestUtils.range
+import static be.gerard.time.DateRangeTestUtils.ranges
 import static org.assertj.core.api.Assertions.assertThat
 
 @Title("DateRange")
@@ -392,7 +395,7 @@ class DateRangeSpecification extends Specification {
         final String displayString = range.asText()
 
         then:
-        assertThat(displayString).isEqualTo(expectedDisplayString)
+        displayString == expectedDisplayString
 
         where:
         rangeAsString            | expectedDisplayString
